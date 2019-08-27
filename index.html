@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!-- was actually expecting a websockets API -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>
+	<title>Test Michael Fasanya</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="images/icons/favicon.ico">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="css/util.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+<!--===============================================================================================-->
+	<script src="Test Michael Fasanya_files/angular.min.js.download"></script>
+<!--===============================================================================================-->
+</head>
+<body>
+	
+	<div ng-app="myApp" ng-controller="myCtrl" class="limiter ng-scope">
+		<div class="container-table100">
+			<div class="wrap-table100">
+				<div class="table100 ver6 m-b-110">
+					<table data-vertable="ver6">
+						<thead>
+						<tr class="row100 head">
+							<th nowrap="" class="column100 column8" data-column="column16">Check  Rates </th>
+							<th class="column100 column1" data-column="column1">
+								Select Currency
+								<select class="form-control" ng-model="selectedCurrency">
+									<option ng-value="currency" ng-repeat="(currency,data) in info" > {{ currency }} </option>
+								</select>
+							</th>
+							<th class="column100 column1" data-column="column1">
+								Enter Bid Amount
+								<input class="form-control" ng-model="bidAmount" min="1"  ng-model-options="{debounce: 1000}"/>
+							</th>
+							<th>
+								&nbsp&nbspLive Rate
+								<h3>&nbsp&nbsp <u>{{offerAmount}}</u></h3>
+							</th>
+
+<!--							<th class="column100 column1" data-column="column1">Rate: {{offerAmount}}</th>-->
+						</tr>
+						</thead>
+					</table>
+				</div>
+				<div class="table100 ver6 m-b-110">
+					<table data-vertable="ver6">
+						<thead>
+							<tr class="row100 head">
+								<th class="column100 column0" data-column="column0">Currency</th>
+								<th class="column100 column1" data-column="column1">Symbol</th>
+								<th class="column100 column2" data-column="column2">15m &nbsp&nbsp (Rate)</th>
+								<th class="column100 column3" data-column="column3">Buy &nbsp&nbsp (Rate)</th>
+								<th class="column100 column4" data-column="column4">Sell &nbsp&nbsp (Rate)</th>
+								<th  class="column100 column5" data-column="column5">Last &nbsp&nbsp (Rate)</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="(currency,data) in info" class="row100 ng-scope">
+								<td class="column100 column1 ng-binding" data-column="column1">{{ currency }}</td>
+								<td class="column100 column1 ng-binding" data-column="column2">{{ data.symbol }}</td>
+								<td class="column100 column1 ng-binding" data-column="column3">{{ data['15m'] }}</td>
+								<td class="column100 column1 ng-binding" data-column="column4">{{ data.buy }}</td>
+								<td class="column100 column1 ng-binding" data-column="column5">{{ data.sell }}</td>
+								<td class="column100 column1 ng-binding" data-column="column6">{{ data.last }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+<!--===============================================================================================-->	
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+	<script src="vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="js/main.js"></script>
+
+
+
+
+<script>
+	var app = angular.module('myApp', []);
+	app.controller('myCtrl', function($scope, $http,$interval) {
+
+		$scope.currencyList = [];
+		$scope.selectedCurrency = "";
+		$scope.bidAmount = 0;
+		$scope.offerAmount = 0;
+		$scope.getdata=function(){
+			$http.get("https://blockchain.info/ticker")
+					.then(function(response) {
+						$scope.info = response.data;
+						$scope.currencyList = Object.keys($scope.info);
+					});
+		};
+
+		$interval($scope.getdata,1000);
+
+		$scope.convertValue = function(){
+
+			if($scope.selectedCurrency == undefined || $scope.selectedCurrency.length < 1) {
+				return;
+			}
+			$http.get("https://blockchain.info/tobtc?currency=" + $scope.selectedCurrency + "&value=" + $scope.bidAmount)
+					.then(function(response){
+						$scope.offerAmount= response.data;
+					});
+		};
+
+		$scope.$watch("bidAmount", function(newValue, oldValue){
+			$scope.convertValue();
+		});
+
+		$scope.$watch("selectedCurrency", function(){
+			$scope.convertValue();
+		});
+	});
+</script>
+</body>
+</html>
